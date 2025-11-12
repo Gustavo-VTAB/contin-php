@@ -3,17 +3,8 @@ import AppLayout from '@/Layout/AppLayout';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
+import { Card } from '@/types';
 
-interface Card {
-  id: number;
-  name: string;
-  number: string;
-  validity: string;
-  cvv: string;
-  limit: string;
-  status: string;
-  obs: string;
-}
 
 export default function CardsPage() {
   const [cards, setCards] = useState<Card[]>([

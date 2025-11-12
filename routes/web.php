@@ -33,4 +33,20 @@ Route::group([
 ], function () {
     require __DIR__ . '/Auth/auth.php';
 });
+
+Route::group([
+    'prefix' => 'profiles',
+    'as' => 'profiles.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/profiles.php';   
+});
+
+Route::group([
+    'prefix' => 'phones',
+    'as' => 'phones.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/phones.php';
+});
     

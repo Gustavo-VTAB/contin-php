@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/Layout/AppLayout';
 import Modal from '../../components/Modal';
 import StatusBadge from '../../components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
+import { profileService } from './service/profileService';
 
 interface Profile {
   id: number;
@@ -16,15 +17,17 @@ interface Profile {
 }
 
 export default function ProfilesPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([
-    { id: 1, name: 'João Silva', manager_id: 1, manager_name: 'Manager Principal', phone_id: 1, phone_number: '(11) 98765-4321', status: 'active', obs: 'Perfil principal' },
-    { id: 2, name: 'Maria Santos', manager_id: null, phone_id: 2, phone_number: '(11) 91234-5678', status: 'active', obs: '' },
-  ]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [managers, setManagers] = useState([]);
 
-  const mockManagers = [
-    { id: 1, name: 'Manager Principal' },
-    { id: 2, name: 'Manager Secundário' },
-  ];
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const response = await profileService.getAllProfiles();
+      setProfiles(response.data);
+    };
+    
+    fetchProfiles();
+  }, []);
 
   const mockPhones = [
     { id: 1, number: '(11) 98765-4321' },

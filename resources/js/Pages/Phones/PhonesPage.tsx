@@ -3,142 +3,121 @@ import AppLayout from '@/Layout/AppLayout';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
+import { Card, Phone } from '@/types';
 
-interface Page {
-  id: number;
-  name: string;
-  ig_login: string;
-  ig_email: string;
-  ig_password: string;
-  status: string;
-  obs: string;
-}
 
-export default function PagesPage() {
-  const [pages, setPages] = useState<Page[]>([
-    { id: 1, name: 'Página Loja Online', ig_login: '@lojavirtual', ig_email: 'loja@example.com', ig_password: '********', status: 'active', obs: 'Página integrada com Instagram' },
-    { id: 2, name: 'Página de Teste', ig_login: '@testepage', ig_email: 'teste@example.com', ig_password: '********', status: 'inactive', obs: 'Página em modo de teste' },
-  ]);
-
+export default function PhonesPage() {
+  const [phones, setPhones] = useState<Phone[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
+  const [selectedPhone, setSelectedPhone] = useState<Phone | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    ig_login: '',
-    ig_email: '',
-    ig_password: '',
+    number: '',
+    operator: '',
+    card_id: '',
     status: 'active',
-    obs: '',
+    easy_at: '',
   });
 
-  const handleOpenModal = (mode: 'create' | 'edit' | 'view', page?: Page) => {
+  const handleOpenModal = (mode: 'create' | 'edit' | 'view', phone?: Phone) => {
     setModalMode(mode);
-    if (page) {
-      setSelectedPage(page);
+    if (phone) {
+      setSelectedPhone(phone);
       setFormData({
-        name: page.name,
-        ig_login: page.ig_login,
-        ig_email: page.ig_email,
-        ig_password: page.ig_password,
-        status: page.status,
-        obs: page.obs,
+        name: phone.name,
+        number: phone.number,
+        operator: phone.operator,
+        card_id: phone.card_id?.toString() || '',
+        status: phone.status,
+        easy_at: phone.easy_at,
       });
     } else {
-      setFormData({ name: '', ig_login: '', ig_email: '', ig_password: '', status: 'active', obs: '' });
+      setFormData({ name: '', number: '', operator: '', card_id: '', status: 'active', easy_at: '' });
     }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedPage(null);
+    setSelectedPhone(null);
   };
 
-  // 🔹 Função de salvar/criar agora é chamada manualmente
   const handleSave = () => {
-    if (modalMode === 'create') {
-      const newPage: Page = {
-        id: pages.length + 1,
-        ...formData,
-      };
-      setPages([...pages, newPage]);
-    } else if (modalMode === 'edit' && selectedPage) {
-      setPages(pages.map(p => p.id === selectedPage.id ? { ...p, ...formData } : p));
-    }
-    handleCloseModal();
+   
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Tem certeza que deseja excluir esta página?')) {
-      setPages(pages.filter(p => p.id !== id));
-    }
-  };
-
-  const filteredPages = pages.filter(page =>
-    page.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    page.ig_login.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPhones = phones.filter(phone =>
+    phone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    phone.number.includes(searchTerm) ||
+    phone.operator.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Páginas do Facebook</h1>
-            <p className="text-gray-400 mt-1">Gerencie as páginas cadastradas</p>
+            <h1 className="text-3xl font-bold text-white">Telefones</h1>
+            <p className="text-gray-400 mt-1">Gerencie os telefones cadastrados</p>
           </div>
           <button
             onClick={() => handleOpenModal('create')}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             <Plus size={20} />
-            Nova Página
+            Novo Telefone
           </button>
         </div>
 
+        {/* Busca */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar páginas..."
+            placeholder="Buscar telefones..."
             className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
 
+        {/* Tabela */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-800">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nome</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Instagram Login</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Número</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Operadora</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cartão</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {filteredPages.map((page) => (
-                  <tr key={page.id} className="hover:bg-gray-800 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{page.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{page.ig_login}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{page.ig_email}</td>
+                {filteredPhones.map((phone) => (
+                  <tr key={phone.id} className="hover:bg-gray-800 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{phone.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{phone.number}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{phone.operator}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{phone.card_name || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={page.status} />
+                      <StatusBadge status={phone.status} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleOpenModal('view', page)} className="text-blue-500 hover:text-blue-400">
+                        <button onClick={() => handleOpenModal('view', phone)} className="text-blue-500 hover:text-blue-400">
                           <Eye size={18} />
                         </button>
-                        <button onClick={() => handleOpenModal('edit', page)} className="text-green-500 hover:text-green-400">
+                        <button onClick={() => handleOpenModal('edit', phone)} className="text-green-500 hover:text-green-400">
                           <Edit size={18} />
                         </button>
-                        <button onClick={() => handleDelete(page.id)} className="text-red-500 hover:text-red-400">
+                        <button onClick={() => handleDelete(phone.id)} className="text-red-500 hover:text-red-400">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -150,82 +129,90 @@ export default function PagesPage() {
           </div>
         </div>
 
-        {/* 🔹 MODAL SEM FORM */}
+        {/* Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={modalMode === 'create' ? 'Nova Página' : modalMode === 'edit' ? 'Editar Página' : 'Visualizar Página'}
-          size="lg"
+          title={modalMode === 'create' ? 'Novo Telefone' : modalMode === 'edit' ? 'Editar Telefone' : 'Visualizar Telefone'}
         >
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nome da Página</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Nome</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={modalMode === 'view'}
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Login</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Número</label>
                 <input
                   type="text"
-                  value={formData.ig_login}
-                  onChange={(e) => setFormData({ ...formData, ig_login: e.target.value })}
+                  value={formData.number}
+                  onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                   disabled={modalMode === 'view'}
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  placeholder="@usuario"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Email</label>
-                <input
-                  type="email"
-                  value={formData.ig_email}
-                  onChange={(e) => setFormData({ ...formData, ig_email: e.target.value })}
+                <label className="block text-sm font-medium text-gray-300 mb-2">Operadora</label>
+                <select
+                  value={formData.operator}
+                  onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  placeholder="email@example.com"
-                />
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Vivo">Vivo</option>
+                  <option value="Claro">Claro</option>
+                  <option value="TIM">TIM</option>
+                  <option value="Oi">Oi</option>
+                </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Senha</label>
-                <input
-                  type="password"
-                  value={formData.ig_password}
-                  onChange={(e) => setFormData({ ...formData, ig_password: e.target.value })}
+                <label className="block text-sm font-medium text-gray-300 mb-2">Cartão Vinculado</label>
+                <select
+                  value={formData.card_id}
+                  onChange={(e) => setFormData({ ...formData, card_id: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  placeholder="••••••••"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                >
+                  <option value="">Nenhum</option>
+                    {cards.map(card => (
+                      <option key={card.id} value={card.id}>{card.name}</option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Data Easy</label>
+                <input
+                  type="date"
+                  value={formData.easy_at}
+                  onChange={(e) => setFormData({ ...formData, easy_at: e.target.value })}
+                  disabled={modalMode === 'view'}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Observações</label>
-              <textarea
-                value={formData.obs}
-                onChange={(e) => setFormData({ ...formData, obs: e.target.value })}
-                disabled={modalMode === 'view'}
-                rows={3}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-              />
             </div>
 
             {modalMode !== 'view' && (
@@ -237,7 +224,7 @@ export default function PagesPage() {
                   Cancelar
                 </button>
                 <button
-                  onClick={handleSave} // 🔹 Chama diretamente a função
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   {modalMode === 'create' ? 'Criar' : 'Salvar'}
