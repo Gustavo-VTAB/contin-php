@@ -21,82 +21,21 @@ export default function ProfilesPage() {
     { id: 2, name: 'Maria Santos', manager_id: null, phone_id: 2, phone_number: '(11) 91234-5678', status: 'active', obs: '' },
   ]);
 
-  const mockManagers = [
-    { id: 1, name: 'Manager Principal' },
-    { id: 2, name: 'Manager Secundário' },
-  ];
-
-  const mockPhones = [
-    { id: 1, number: '(11) 98765-4321' },
-    { id: 2, number: '(11) 91234-5678' },
-  ];
-
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    manager_id: '',
-    phone_id: '',
-    status: 'active',
-    obs: '',
-  });
 
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', profile?: Profile) => {
     setModalMode(mode);
-    if (profile) {
-      setSelectedProfile(profile);
-      setFormData({
-        name: profile.name,
-        manager_id: profile.manager_id?.toString() || '',
-        phone_id: profile.phone_id?.toString() || '',
-        status: profile.status,
-        obs: profile.obs,
-      });
-    } else {
-      setFormData({ name: '', manager_id: '', phone_id: '', status: 'active', obs: '' });
-    }
+    if (profile) setSelectedProfile(profile);
+    else setSelectedProfile(null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProfile(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const managerId = formData.manager_id ? parseInt(formData.manager_id) : null;
-    const phoneId = formData.phone_id ? parseInt(formData.phone_id) : null;
-    const managerName = managerId ? mockManagers.find(m => m.id === managerId)?.name : undefined;
-    const phoneNumber = phoneId ? mockPhones.find(p => p.id === phoneId)?.number : undefined;
-
-    if (modalMode === 'create') {
-      const newProfile: Profile = {
-        id: profiles.length + 1,
-        name: formData.name,
-        manager_id: managerId,
-        manager_name: managerName,
-        phone_id: phoneId,
-        phone_number: phoneNumber,
-        status: formData.status,
-        obs: formData.obs,
-      };
-      setProfiles([...profiles, newProfile]);
-    } else if (modalMode === 'edit' && selectedProfile) {
-      setProfiles(profiles.map(p => p.id === selectedProfile.id ? {
-        ...p,
-        name: formData.name,
-        manager_id: managerId,
-        manager_name: managerName,
-        phone_id: phoneId,
-        phone_number: phoneNumber,
-        status: formData.status,
-        obs: formData.obs,
-      } : p));
-    }
-    handleCloseModal();
   };
 
   const handleDelete = (id: number) => {
@@ -112,6 +51,7 @@ export default function ProfilesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Perfis do Facebook</h1>
@@ -126,6 +66,7 @@ export default function ProfilesPage() {
           </button>
         </div>
 
+        {/* Busca */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
@@ -137,6 +78,7 @@ export default function ProfilesPage() {
           />
         </div>
 
+        {/* Tabela */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -178,93 +120,42 @@ export default function ProfilesPage() {
           </div>
         </div>
 
+        {/* Modal sem form */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={modalMode === 'create' ? 'Novo Perfil' : modalMode === 'edit' ? 'Editar Perfil' : 'Visualizar Perfil'}
+          title={
+            modalMode === 'create'
+              ? 'Novo Perfil'
+              : modalMode === 'edit'
+              ? 'Editar Perfil'
+              : 'Detalhes do Perfil'
+          }
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nome</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Manager</label>
-                <select
-                  value={formData.manager_id}
-                  onChange={(e) => setFormData({ ...formData, manager_id: e.target.value })}
-                  disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                >
-                  <option value="">Nenhum</option>
-                  {mockManagers.map(manager => (
-                    <option key={manager.id} value={manager.id}>{manager.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Telefone</label>
-                <select
-                  value={formData.phone_id}
-                  onChange={(e) => setFormData({ ...formData, phone_id: e.target.value })}
-                  disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                >
-                  <option value="">Nenhum</option>
-                  {mockPhones.map(phone => (
-                    <option key={phone.id} value={phone.id}>{phone.number}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                >
-                  <option value="active">Ativo</option>
-                  <option value="inactive">Inativo</option>
-                </select>
-              </div>
+          {selectedProfile ? (
+            <div className="space-y-3 text-gray-300">
+              <p><strong>Nome:</strong> {selectedProfile.name}</p>
+              <p><strong>Manager:</strong> {selectedProfile.manager_name || '-'}</p>
+              <p><strong>Telefone:</strong> {selectedProfile.phone_number || '-'}</p>
+              <p><strong>Status:</strong> <StatusBadge status={selectedProfile.status} /></p>
+              <p><strong>Observações:</strong> {selectedProfile.obs || '-'}</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Observações</label>
-              <textarea
-                value={formData.obs}
-                onChange={(e) => setFormData({ ...formData, obs: e.target.value })}
-                disabled={modalMode === 'view'}
-                rows={3}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-              />
+          ) : (
+            <div className="text-gray-400">
+              {modalMode === 'create'
+                ? 'Função de criação desativada (formulário removido).'
+                : 'Nenhum perfil selecionado.'}
             </div>
-            {modalMode !== 'view' && (
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  {modalMode === 'create' ? 'Criar' : 'Salvar'}
-                </button>
-              </div>
-            )}
-          </form>
+          )}
+
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={handleCloseModal}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
         </Modal>
       </div>
     </AppLayout>
