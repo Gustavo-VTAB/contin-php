@@ -1,17 +1,46 @@
 import { useState } from 'react';
 import { Lock, Mail } from 'lucide-react';
 import { router } from '@inertiajs/react';
-
+import { loginService } from '@/Pages/Auth/Service/loginService';
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [blocked, setBlocked] = useState<boolean>(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulação de login - em produção, fazer chamada à API
-    router.visit('/dashboard');
+    
+    try {
+      const response = await loginService.login(formData);
+      console.log(response);
+
+      if(response.message === 'Usuário bloqueado.'){
+        setBlocked(true);
+        return;
+      }
+
+      if(response.success === true){
+        localStorage.setItem('user', response.user);
+        router.visit('/dashboard');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleBlocked = async () => {
+    try {
+      const response = await loginService.resetBlocked(formData.email);
+      console.log(response);
+
+      if(response.success === true){
+        setBlocked(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -27,7 +56,7 @@ export default function Login() {
         <div className="bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-8">
           <h2 className="text-2xl font-semibold text-white mb-6">Entrar</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -80,17 +109,28 @@ export default function Login() {
 
             {/* Submit Button */}
             <button
-              type="submit"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+              onClick={handleSubmit}
+              disabled={blocked}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-500 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-900"
             >
               Entrar
             </button>
-          </form>
+
+            {blocked && (
+              <button
+                onClick={handleBlocked}
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+              >
+                Desbloquear
+              </button>
+            )}
+            
+          </div>
 
           {/* Register Link */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Não tem uma conta?{' '}
-            <a onClick={() => router.visit("/Cadastro")} className="text-blue-500 hover:text-blue-400 font-medium">
+            <a onClick={() => router.visit("/register")} className="text-blue-500 hover:text-blue-400 font-medium">
               Cadastre-se
             </a>
           </p>

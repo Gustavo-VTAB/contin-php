@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User, Mail, Lock } from "lucide-react";
 import { router } from "@inertiajs/react";
+import { registerService } from "@/Pages/Auth/Service/registerService";
 
 export default function Register() {
 
@@ -8,20 +9,18 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    confirm: "",
+    password_confirmation: "",
   });
 
-  const registerUser = () => {
-    if (!data.name || !data.email || !data.password) return;
-
-    if (data.password !== data.confirm) {
-      alert("As senhas não coincidem");
-      return;
+  const registerUser = async () => {
+    try {
+      const response = await registerService.register(data);
+      if(response.success){
+        router.visit('/login');
+      }
+    } catch (error) {
+      console.error(error);
     }
-
-    // simulação
-    alert("Cadastro realizado!");
-    router.visit("/");
   };
 
   return (
@@ -100,9 +99,9 @@ export default function Register() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 <input
                   type="password"
-                  value={data.confirm}
+                  value={data.password_confirmation}
                   onChange={(e) =>
-                    setData({ ...data, confirm: e.target.value })
+                    setData({ ...data, password_confirmation: e.target.value })
                   }
                   className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   placeholder="Repita a senha"

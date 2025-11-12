@@ -13,8 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["resources/js/*"]
-    }
+    },
+    "allowJs": true,
   },
-  "include": ["resources/js/**/*", "resources/js/Pages"],
+  "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx", "resources/js/**/*.js", "resources/js/**/*.jsx" ,"resources/js/Pages"],
   "exclude": ["node_modules"]
 }

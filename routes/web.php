@@ -26,4 +26,12 @@ Route::group([
 
 
 });
+
+Route::group([
+    'prefix' => 'Auth',
+    'as' => 'Auth.',
+    'namespace' => 'App\Http\Controllers\Auth',
+], function () {
+    require __DIR__ . '/Auth/auth.php';
+});
     
