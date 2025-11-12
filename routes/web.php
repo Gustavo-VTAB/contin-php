@@ -25,4 +25,12 @@ Route::group([
     Route::get('/logs', [LogsController::class, 'index'])->name('logs');
     Route::get('/profile', [ProfilesController::class, 'profile'])->name('profile');
 });
+
+Route::group([
+    'prefix' => 'Auth',
+    'as' => 'Auth.',
+    'namespace' => 'App\Http\Controllers\Auth',
+], function () {
+    require __DIR__ . '/Auth/auth.php';
+});
     
