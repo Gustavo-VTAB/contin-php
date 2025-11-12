@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import AppLayout from '../../components/Layout/AppLayout';
-import Modal from '../../components/Modal';
-import StatusBadge from '../../components/StatusBadge';
+import AppLayout from '@/Layout/AppLayout';
+import Modal from '@/components/Modal';
+import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 
 interface Phone {

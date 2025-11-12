@@ -9,8 +9,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["resources/js/*"]
+    }
   },
-  "include": ["resources/js/**/*"],
+  "include": ["resources/js/**/*", "resources/js/Pages"],
   "exclude": ["node_modules"]
 }

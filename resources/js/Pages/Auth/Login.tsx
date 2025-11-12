@@ -1,89 +1,101 @@
 import { useState } from 'react';
-import { Inertia } from '@inertiajs/inertia';
-// import { api } from '../../Services/api';
-import { toast } from 'sonner';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import api from '../../services/api';
+import { Lock, Mail } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
-  const handleLogin = async () => {
-    // if (!email || !password) {
-    //   toast.error('Preencha todos os campos');
-    //   return;
-    // }
-
-    // try {
-    //   setLoading(true);
-    //     const res = await api.post('/api/login', { email, password });
-
-    //   if (res.data.success) {
-    //     toast.success('Login realizado!');
-    //     Inertia.visit('/dashboard'); // navegação SPA-like
-    //   } else {
-    //     toast.error(res.data.message || 'Login inválido');
-    //   }
-    // } catch (err: any) {
-    //   toast.error(err.message || 'Erro ao logar');
-    // } finally {
-    //   setLoading(false);
-    // }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulação de login - em produção, fazer chamada à API
+    router.visit('/dashboard');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-              <Mail className="h-8 w-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">FB Manager</h1>
-            <p className="text-gray-600">Faça login para continuar</p>
-          </div>
+        {/* Logo/Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">FB Manager</h1>
+          <p className="text-gray-400">Sistema de Gerenciamento</p>
+        </div>
 
-          {/* Campos */}
-          <div className="space-y-6">
+        {/* Login Card */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-8">
+          <h2 className="text-2xl font-semibold text-white mb-6">Entrar</h2>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
             <div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg"
-              />
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  placeholder="seu@email.com"
+                  required
+                />
+              </div>
             </div>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha"
-                className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg"
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
             </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-700 rounded focus:ring-blue-600 focus:ring-2"
+                />
+                <span className="ml-2 text-sm text-gray-300">Lembrar-me</span>
+              </label>
+              <a href="#" className="text-sm text-blue-500 hover:text-blue-400">
+                Esqueceu a senha?
+              </a>
+            </div>
+
+            {/* Submit Button */}
             <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              type="submit"
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-900"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              Entrar
             </button>
-          </div>
+          </form>
+
+          {/* Register Link */}
+          <p className="mt-6 text-center text-sm text-gray-400">
+            Não tem uma conta?{' '}
+            <a href="#" className="text-blue-500 hover:text-blue-400 font-medium">
+              Cadastre-se
+            </a>
+          </p>
         </div>
       </div>
     </div>
   );
-}
+}  
