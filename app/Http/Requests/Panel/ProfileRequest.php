@@ -22,10 +22,10 @@ class ProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'phone_id' => 'required|integer',
-            'status' => 'required|string|max:255',
-            'obs' => 'required|string|max:255',
+            'name' => 'string|max:255',
+            'phone_id' => 'integer|nullable',
+            'status' => 'string|max:255',
+            'obs' => 'string|max:255|nullable',
         ];
     }
 

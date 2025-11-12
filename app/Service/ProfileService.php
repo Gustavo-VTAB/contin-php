@@ -8,7 +8,9 @@ class ProfileService
 {
     public function getAllProfiles()
     {
-        return DB::table('fb_profiles')->get();
+         return DB::table('fb_profiles')
+            ->where('deleted', false)
+            ->get();
     }
 
     public function createProfile($data)
@@ -38,21 +40,13 @@ class ProfileService
         return ['message' => 'Perfil atualizado com sucesso!'];
     }
 
-    public function deleteProfile($id)
+     public function deleteProfile($id)
     {
-        $oldData = DB::table('fb_profiles')->where('id', $id)->first();
-
-        DB::table('fb_profiles')->where('id', $id)->delete();
-
-        DB::table('logs')->insert([
-            'user_id' => auth()->id() ?? 0,
-            'table_name' => 'fb_profiles',
-            'record_id' => $id,
-            'action' => 'DELETE',
-            'old_data' => json_encode($oldData),
-            'created_at' => now(),
+        DB::statement('CALL sp_excluir_fb_profile(?, ?)', [
+            $id,
+            auth()->id() ?? 0
         ]);
 
-        return ['message' => 'Perfil deletado com sucesso!'];
+        return ['message' => 'Perfil excluído (soft delete) com sucesso!'];
     }
 }

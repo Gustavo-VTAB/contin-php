@@ -4,40 +4,32 @@ import Modal from '../../components/Modal';
 import StatusBadge from '../../components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 import { profileService } from './service/profileService';
+import { phoneService } from '../Phones/Service/phoneService';
+import { Phone, Profile } from '@/types';
+import { toast } from 'sonner';
 
-interface Profile {
-  id: number;
-  name: string;
-  manager_id: number | null;
-  manager_name?: string;
-  phone_id: number | null;
-  phone_number?: string;
-  status: string;
-  obs: string;
-}
+
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [managers, setManagers] = useState([]);
-
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      const response = await profileService.getAllProfiles();
-      setProfiles(response.data);
-    };
-    
-    fetchProfiles();
-  }, []);
-
-  const mockPhones = [
-    { id: 1, number: '(11) 98765-4321' },
-    { id: 2, number: '(11) 91234-5678' },
-  ];
-
+  const [phones, setPhones] = useState<Phone[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const response = await profileService.getAllProfiles();
+      setProfiles(response);
+    };
+    
+    const fetchPhones = async () => {
+      const response = await phoneService.getPhones();
+      setPhones(response.data);
+    };
+    fetchProfiles();
+  }, []);
 
   // Dados temporários do modal
   const [tempData, setTempData] = useState({
@@ -71,54 +63,36 @@ export default function ProfilesPage() {
     setSelectedProfile(null);
   };
 
-  const handleSave = () => {
-    const managerId = tempData.manager_id ? parseInt(tempData.manager_id) : null;
-    const phoneId = tempData.phone_id ? parseInt(tempData.phone_id) : null;
-    const managerName = managerId ? mockManagers.find(m => m.id === managerId)?.name : undefined;
-    const phoneNumber = phoneId ? mockPhones.find(p => p.id === phoneId)?.number : undefined;
-
-    if (modalMode === 'create') {
-      const newProfile: Profile = {
-        id: profiles.length + 1,
-        name: tempData.name,
-        manager_id: managerId,
-        manager_name: managerName,
-        phone_id: phoneId,
-        phone_number: phoneNumber,
-        status: tempData.status,
-        obs: tempData.obs,
-      };
-      setProfiles([...profiles, newProfile]);
-    } else if (modalMode === 'edit' && selectedProfile) {
-      setProfiles(
-        profiles.map(p =>
-          p.id === selectedProfile.id
-            ? {
-                ...p,
-                name: tempData.name,
-                manager_id: managerId,
-                manager_name: managerName,
-                phone_id: phoneId,
-                phone_number: phoneNumber,
-                status: tempData.status,
-                obs: tempData.obs,
-              }
-            : p
-        )
-      );
+  const handleSave = async() => {
+    try {
+      if (modalMode === 'create') {
+        const response = await profileService.createProfile(tempData);
+      } else if (modalMode === 'edit' && selectedProfile) {
+        const response = await profileService.updateProfile(selectedProfile.id, tempData);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error);
     }
-    handleCloseModal();
+    
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async(id: number) => {
     if (confirm('Tem certeza que deseja excluir este perfil?')) {
-      setProfiles(profiles.filter(p => p.id !== id));
+      try {
+        const response = await profileService.deleteProfile(id);
+        setProfiles(profiles.filter(p => p.id !== id));
+        toast.success(response.message);
+      } catch (error) {
+        console.error('Erro ao excluir perfil:', error);
+      }
     }
   };
 
-  const filteredProfiles = profiles.filter(profile =>
-    profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProfiles = (profiles ? profiles : [] ).filter(profile =>
+    profile.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   return (
     <AppLayout>
@@ -157,7 +131,6 @@ export default function ProfilesPage() {
               <thead className="bg-gray-800">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nome</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Manager</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Telefone</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Ações</th>
@@ -167,7 +140,6 @@ export default function ProfilesPage() {
                 {filteredProfiles.map((profile) => (
                   <tr key={profile.id} className="hover:bg-gray-800 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{profile.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{profile.manager_name || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{profile.phone_number || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={profile.status} />
@@ -217,20 +189,6 @@ export default function ProfilesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Manager</label>
-                <select
-                  value={tempData.manager_id}
-                  onChange={(e) => setTempData({ ...tempData, manager_id: e.target.value })}
-                  disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
-                >
-                  <option value="">Nenhum</option>
-                  {mockManagers.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Telefone</label>
                 <select
                   value={tempData.phone_id}
@@ -239,8 +197,8 @@ export default function ProfilesPage() {
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                 >
                   <option value="">Nenhum</option>
-                  {mockPhones.map((p) => (
-                    <option key={p.id} value={p.id}>{p.number}</option>
+                  {phones.map((phone) => (
+                    <option key={phone.id} value={phone.id}>{phone.number}</option>
                   ))}
                 </select>
               </div>

@@ -19,3 +19,14 @@ interface Card {
   status: string;
   obs: string;
 }
+
+interface Profile {
+  id: number;
+  name: string;
+  manager_id: number | null;
+  manager_name?: string;
+  phone_id: number | null;
+  phone_number?: string;
+  status: string;
+  obs: string;
+}
