@@ -27,7 +27,7 @@ export default function Modal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-999 flex items-center justify-center px-4">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/70 backdrop-blur-sm"
