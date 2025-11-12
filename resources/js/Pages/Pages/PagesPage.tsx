@@ -16,8 +16,24 @@ interface Page {
 
 export default function PagesPage() {
   const [pages, setPages] = useState<Page[]>([
-    { id: 1, name: 'Página Loja Online', ig_login: '@lojavirtual', ig_email: 'loja@example.com', ig_password: '********', status: 'active', obs: 'Página integrada com Instagram' },
-    { id: 2, name: 'Página de Teste', ig_login: '@testepage', ig_email: 'teste@example.com', ig_password: '********', status: 'inactive', obs: 'Página em modo de teste' },
+    {
+      id: 1,
+      name: 'Página Loja Online',
+      ig_login: '@lojavirtual',
+      ig_email: 'loja@example.com',
+      ig_password: '********',
+      status: 'active',
+      obs: 'Página integrada com Instagram',
+    },
+    {
+      id: 2,
+      name: 'Página de Teste',
+      ig_login: '@testepage',
+      ig_email: 'teste@example.com',
+      ig_password: '********',
+      status: 'inactive',
+      obs: 'Página em modo de teste',
+    },
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,13 +75,10 @@ export default function PagesPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (modalMode === 'create') {
-      const newPage: Page = {
-        id: pages.length + 1,
-        ...formData,
-      };
+      const newPage: Page = { id: pages.length + 1, ...formData };
       setPages([...pages, newPage]);
     } else if (modalMode === 'edit' && selectedPage) {
-      setPages(pages.map(p => p.id === selectedPage.id ? { ...p, ...formData } : p));
+      setPages(pages.map(p => (p.id === selectedPage.id ? { ...p, ...formData } : p)));
     }
     handleCloseModal();
   };
@@ -84,6 +97,7 @@ export default function PagesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Páginas do Facebook</h1>
@@ -98,6 +112,7 @@ export default function PagesPage() {
           </button>
         </div>
 
+        {/* Campo de busca */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
@@ -109,6 +124,7 @@ export default function PagesPage() {
           />
         </div>
 
+        {/* Tabela */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -150,10 +166,17 @@ export default function PagesPage() {
           </div>
         </div>
 
+        {/* Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={modalMode === 'create' ? 'Nova Página' : modalMode === 'edit' ? 'Editar Página' : 'Visualizar Página'}
+          title={
+            modalMode === 'create'
+              ? 'Nova Página'
+              : modalMode === 'edit'
+              ? 'Editar Página'
+              : 'Visualizar Página'
+          }
           size="lg"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -165,10 +188,11 @@ export default function PagesPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Login</label>
                 <input
@@ -176,10 +200,11 @@ export default function PagesPage() {
                   value={formData.ig_login}
                   onChange={(e) => setFormData({ ...formData, ig_login: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   placeholder="@usuario"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Email</label>
                 <input
@@ -187,10 +212,11 @@ export default function PagesPage() {
                   value={formData.ig_email}
                   onChange={(e) => setFormData({ ...formData, ig_email: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   placeholder="email@example.com"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Senha</label>
                 <input
@@ -198,23 +224,25 @@ export default function PagesPage() {
                   value={formData.ig_password}
                   onChange={(e) => setFormData({ ...formData, ig_password: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   placeholder="••••••••"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
                 </select>
               </div>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Observações</label>
               <textarea
@@ -222,9 +250,10 @@ export default function PagesPage() {
                 onChange={(e) => setFormData({ ...formData, obs: e.target.value })}
                 disabled={modalMode === 'view'}
                 rows={3}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
               />
             </div>
+
             {modalMode !== 'view' && (
               <div className="flex justify-end gap-3 pt-4">
                 <button
