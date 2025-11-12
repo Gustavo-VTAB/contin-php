@@ -21,21 +21,90 @@ export default function ProfilesPage() {
     { id: 2, name: 'Maria Santos', manager_id: null, phone_id: 2, phone_number: '(11) 91234-5678', status: 'active', obs: '' },
   ]);
 
+  const mockManagers = [
+    { id: 1, name: 'Manager Principal' },
+    { id: 2, name: 'Manager Secundário' },
+  ];
+
+  const mockPhones = [
+    { id: 1, number: '(11) 98765-4321' },
+    { id: 2, number: '(11) 91234-5678' },
+  ];
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
+  // Dados temporários do modal
+  const [tempData, setTempData] = useState({
+    name: '',
+    manager_id: '',
+    phone_id: '',
+    status: 'active',
+    obs: '',
+  });
+
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', profile?: Profile) => {
     setModalMode(mode);
-    if (profile) setSelectedProfile(profile);
-    else setSelectedProfile(null);
+    if (profile) {
+      setSelectedProfile(profile);
+      setTempData({
+        name: profile.name,
+        manager_id: profile.manager_id?.toString() || '',
+        phone_id: profile.phone_id?.toString() || '',
+        status: profile.status,
+        obs: profile.obs,
+      });
+    } else {
+      setSelectedProfile(null);
+      setTempData({ name: '', manager_id: '', phone_id: '', status: 'active', obs: '' });
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProfile(null);
+  };
+
+  const handleSave = () => {
+    const managerId = tempData.manager_id ? parseInt(tempData.manager_id) : null;
+    const phoneId = tempData.phone_id ? parseInt(tempData.phone_id) : null;
+    const managerName = managerId ? mockManagers.find(m => m.id === managerId)?.name : undefined;
+    const phoneNumber = phoneId ? mockPhones.find(p => p.id === phoneId)?.number : undefined;
+
+    if (modalMode === 'create') {
+      const newProfile: Profile = {
+        id: profiles.length + 1,
+        name: tempData.name,
+        manager_id: managerId,
+        manager_name: managerName,
+        phone_id: phoneId,
+        phone_number: phoneNumber,
+        status: tempData.status,
+        obs: tempData.obs,
+      };
+      setProfiles([...profiles, newProfile]);
+    } else if (modalMode === 'edit' && selectedProfile) {
+      setProfiles(
+        profiles.map(p =>
+          p.id === selectedProfile.id
+            ? {
+                ...p,
+                name: tempData.name,
+                manager_id: managerId,
+                manager_name: managerName,
+                phone_id: phoneId,
+                phone_number: phoneNumber,
+                status: tempData.status,
+                obs: tempData.obs,
+              }
+            : p
+        )
+      );
+    }
+    handleCloseModal();
   };
 
   const handleDelete = (id: number) => {
@@ -120,7 +189,7 @@ export default function ProfilesPage() {
           </div>
         </div>
 
-        {/* Modal sem form */}
+        {/* Modal com botões (sem <form>) */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
@@ -132,29 +201,87 @@ export default function ProfilesPage() {
               : 'Detalhes do Perfil'
           }
         >
-          {selectedProfile ? (
-            <div className="space-y-3 text-gray-300">
-              <p><strong>Nome:</strong> {selectedProfile.name}</p>
-              <p><strong>Manager:</strong> {selectedProfile.manager_name || '-'}</p>
-              <p><strong>Telefone:</strong> {selectedProfile.phone_number || '-'}</p>
-              <p><strong>Status:</strong> <StatusBadge status={selectedProfile.status} /></p>
-              <p><strong>Observações:</strong> {selectedProfile.obs || '-'}</p>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={tempData.name}
+                  onChange={(e) => setTempData({ ...tempData, name: e.target.value })}
+                  disabled={modalMode === 'view'}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Manager</label>
+                <select
+                  value={tempData.manager_id}
+                  onChange={(e) => setTempData({ ...tempData, manager_id: e.target.value })}
+                  disabled={modalMode === 'view'}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
+                >
+                  <option value="">Nenhum</option>
+                  {mockManagers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Telefone</label>
+                <select
+                  value={tempData.phone_id}
+                  onChange={(e) => setTempData({ ...tempData, phone_id: e.target.value })}
+                  disabled={modalMode === 'view'}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
+                >
+                  <option value="">Nenhum</option>
+                  {mockPhones.map((p) => (
+                    <option key={p.id} value={p.id}>{p.number}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                <select
+                  value={tempData.status}
+                  onChange={(e) => setTempData({ ...tempData, status: e.target.value })}
+                  disabled={modalMode === 'view'}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
+                >
+                  <option value="active">Ativo</option>
+                  <option value="inactive">Inativo</option>
+                </select>
+              </div>
             </div>
-          ) : (
-            <div className="text-gray-400">
-              {modalMode === 'create'
-                ? 'Função de criação desativada (formulário removido).'
-                : 'Nenhum perfil selecionado.'}
-            </div>
-          )}
 
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={handleCloseModal}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              Fechar
-            </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Observações</label>
+              <textarea
+                value={tempData.obs}
+                onChange={(e) => setTempData({ ...tempData, obs: e.target.value })}
+                disabled={modalMode === 'view'}
+                rows={3}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              {modalMode !== 'view' && (
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  {modalMode === 'create' ? 'Criar' : 'Salvar'}
+                </button>
+              )}
+            </div>
           </div>
         </Modal>
       </div>
