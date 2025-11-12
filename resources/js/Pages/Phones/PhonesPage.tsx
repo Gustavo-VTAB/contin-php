@@ -62,10 +62,14 @@ export default function PhonesPage() {
     setSelectedPhone(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = () => {
     const cardId = formData.card_id ? parseInt(formData.card_id) : null;
     const cardName = cardId ? mockCards.find(c => c.id === cardId)?.name : undefined;
+
+    if (!formData.name || !formData.number || !formData.operator) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
 
     if (modalMode === 'create') {
       const newPhone: Phone = {
@@ -91,6 +95,7 @@ export default function PhonesPage() {
         easy_at: formData.easy_at,
       } : p));
     }
+
     handleCloseModal();
   };
 
@@ -109,7 +114,7 @@ export default function PhonesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Cabeçalho */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Telefones</h1>
@@ -124,7 +129,7 @@ export default function PhonesPage() {
           </button>
         </div>
 
-        {/* Campo de busca */}
+        {/* Busca */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
@@ -184,18 +189,10 @@ export default function PhonesPage() {
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={
-            modalMode === 'create'
-              ? 'Novo Telefone'
-              : modalMode === 'edit'
-              ? 'Editar Telefone'
-              : 'Visualizar Telefone'
-          }
-          size="lg"
+          title={modalMode === 'create' ? 'Novo Telefone' : modalMode === 'edit' ? 'Editar Telefone' : 'Visualizar Telefone'}
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Nome */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Nome</label>
                 <input
@@ -204,11 +201,9 @@ export default function PhonesPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={modalMode === 'view'}
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
                 />
               </div>
 
-              {/* Número */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Número</label>
                 <input
@@ -216,21 +211,17 @@ export default function PhonesPage() {
                   value={formData.number}
                   onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                   disabled={modalMode === 'view'}
-                  placeholder="(11) 98765-4321"
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
                 />
               </div>
 
-              {/* Operadora */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Operadora</label>
                 <select
                   value={formData.operator}
                   onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 >
                   <option value="">Selecione...</option>
                   <option value="Vivo">Vivo</option>
@@ -240,14 +231,13 @@ export default function PhonesPage() {
                 </select>
               </div>
 
-              {/* Cartão */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Cartão Vinculado</label>
                 <select
                   value={formData.card_id}
                   onChange={(e) => setFormData({ ...formData, card_id: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 >
                   <option value="">Nenhum</option>
                   {mockCards.map(card => (
@@ -256,7 +246,6 @@ export default function PhonesPage() {
                 </select>
               </div>
 
-              {/* Data Easy */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Data Easy</label>
                 <input
@@ -264,18 +253,17 @@ export default function PhonesPage() {
                   value={formData.easy_at}
                   onChange={(e) => setFormData({ ...formData, easy_at: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 />
               </div>
 
-              {/* Status */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
@@ -283,25 +271,23 @@ export default function PhonesPage() {
               </div>
             </div>
 
-            {/* Botões */}
             {modalMode !== 'view' && (
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  type="button"
                   onClick={handleCloseModal}
                   className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
-                  type="submit"
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   {modalMode === 'create' ? 'Criar' : 'Salvar'}
                 </button>
               </div>
             )}
-          </form>
+          </div>
         </Modal>
       </div>
     </AppLayout>
