@@ -109,6 +109,7 @@ export default function PhonesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Telefones</h1>
@@ -123,6 +124,7 @@ export default function PhonesPage() {
           </button>
         </div>
 
+        {/* Campo de busca */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
@@ -134,6 +136,7 @@ export default function PhonesPage() {
           />
         </div>
 
+        {/* Tabela */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -177,13 +180,22 @@ export default function PhonesPage() {
           </div>
         </div>
 
+        {/* Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={modalMode === 'create' ? 'Novo Telefone' : modalMode === 'edit' ? 'Editar Telefone' : 'Visualizar Telefone'}
+          title={
+            modalMode === 'create'
+              ? 'Novo Telefone'
+              : modalMode === 'edit'
+              ? 'Editar Telefone'
+              : 'Visualizar Telefone'
+          }
+          size="lg"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Nome</label>
                 <input
@@ -195,6 +207,8 @@ export default function PhonesPage() {
                   required
                 />
               </div>
+
+              {/* Número */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Número</label>
                 <input
@@ -202,11 +216,13 @@ export default function PhonesPage() {
                   value={formData.number}
                   onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   placeholder="(11) 98765-4321"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                   required
                 />
               </div>
+
+              {/* Operadora */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Operadora</label>
                 <select
@@ -223,6 +239,8 @@ export default function PhonesPage() {
                   <option value="Oi">Oi</option>
                 </select>
               </div>
+
+              {/* Cartão */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Cartão Vinculado</label>
                 <select
@@ -237,6 +255,8 @@ export default function PhonesPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Data Easy */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Data Easy</label>
                 <input
@@ -247,6 +267,8 @@ export default function PhonesPage() {
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                 />
               </div>
+
+              {/* Status */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select
@@ -260,6 +282,8 @@ export default function PhonesPage() {
                 </select>
               </div>
             </div>
+
+            {/* Botões */}
             {modalMode !== 'view' && (
               <div className="flex justify-end gap-3 pt-4">
                 <button
