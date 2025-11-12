@@ -23,7 +23,6 @@ Route::group([
     Route::get('/phones', [PhonesController::class, 'index'])->name('phones');
     Route::get('/profiles', [ProfilesController::class, 'index'])->name('profiles');
     Route::get('/logs', [LogsController::class, 'index'])->name('logs');
-
-
+    Route::get('/profile', [ProfilesController::class, 'profile'])->name('profile');
 });
     

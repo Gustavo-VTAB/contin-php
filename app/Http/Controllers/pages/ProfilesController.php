@@ -12,4 +12,8 @@ class ProfilesController extends Controller
     {
         return Inertia::render('Profiles/ProfilesPage');
     }
+     public function profile()
+    {
+        return Inertia::render('Auth/Profile'); 
+    }
 }

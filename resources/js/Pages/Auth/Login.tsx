@@ -90,7 +90,7 @@ export default function Login() {
           {/* Register Link */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Não tem uma conta?{' '}
-            <a onClick={() => router.visit("/Cadastro")} className="text-blue-500 hover:text-blue-400 font-medium">
+            <a onClick={() => router.visit("/register")} className="text-blue-500 hover:text-blue-400 font-medium">
               Cadastre-se
             </a>
           </p>
