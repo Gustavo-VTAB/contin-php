@@ -3,19 +3,11 @@ import AppLayout from "@/Layout/AppLayout";
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
+import { BM } from '@/types';
 
-interface BM {
-  id: number;
-  name: string;
-  status: string;
-  obs: string;
-}
 
 export default function BMsPage() {
-  const [bms, setBms] = useState<BM[]>([
-    { id: 1, name: 'BM Principal', status: 'active', obs: 'Business Manager principal da empresa' },
-    { id: 2, name: 'BM Secundário', status: 'active', obs: 'BM para testes' },
-  ]);
+  const [bms, setBms] = useState<BM[]>([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,17 +40,8 @@ export default function BMsPage() {
   };
 
   // 🔹 Função única para criar ou salvar, sem form
-  const handleSaveClick = () => {
-    if (modalMode === 'create') {
-      const newBM: BM = {
-        id: bms.length + 1,
-        ...formData,
-      };
-      setBms([...bms, newBM]);
-    } else if (modalMode === 'edit' && selectedBM) {
-      setBms(bms.map(b => b.id === selectedBM.id ? { ...b, ...formData } : b));
-    }
-    handleCloseModal();
+  const handleSaveClick = async() => {
+          
   };
 
   const handleDelete = (id: number) => {

@@ -72,7 +72,7 @@ const handleSave = async() => {
       if (modalMode === 'create') {
         const response = await cardService.createCard(formData);
       } else if (modalMode === 'edit' && selectedCard) {
-        const response = await cardService.updateCard(selectedCard.id);
+        const response = await cardService.updateCard(selectedCard.id, formData);
       }
       
     } catch (error) {

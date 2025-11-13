@@ -30,3 +30,11 @@ interface Profile {
   status: string;
   obs: string;
 }
+
+
+interface BM {
+  id: number;
+  name: string;
+  status: string;
+  obs: string;
+}
