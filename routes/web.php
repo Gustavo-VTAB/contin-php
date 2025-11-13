@@ -58,4 +58,11 @@ Route::group([
 ], function () {
     require __DIR__ . '/Panel/logs.php';
 });
->>>>>>> 9ec8b22844b2994419c1ff7b93001eb7595bd2d7
+
+Route::group([
+    'prefix' => 'cards',
+    'as' => 'cards.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/cards.php';
+});
