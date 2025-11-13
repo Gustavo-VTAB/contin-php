@@ -3,7 +3,7 @@ import AppLayout from '@/Layout/AppLayout';
 import Modal from '../../components/Modal';
 import StatusBadge from '../../components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
-import { profileService } from './service/profileService';
+import { profileService } from './Service/profileService';
 import { phoneService } from '../Phones/Service/phoneService';
 import { Phone, Profile } from '@/types';
 import { toast } from 'sonner';
