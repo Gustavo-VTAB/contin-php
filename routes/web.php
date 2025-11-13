@@ -49,4 +49,11 @@ Route::group([
 ], function () {
     require __DIR__ . '/Panel/phones.php';
 });
-    
+
+Route::group([
+    'prefix' => 'logs',
+    'as' => 'logs.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/logs.php';
+});

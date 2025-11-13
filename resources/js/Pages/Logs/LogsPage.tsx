@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/Layout/AppLayout';
 import { Search, Filter } from 'lucide-react';
+import { logService } from '@/Pages/Logs/Service/logService';
 
 interface Log {
   id: number;
@@ -14,33 +15,43 @@ interface Log {
 }
 
 export default function LogsPage() {
-  const [logs] = useState<Log[]>([
-    { id: 1, user_id: 1, user_name: 'Admin User', table_name: 'cards', record_id: 1, action: 'create', created_at: '2025-11-11 10:30:00', description: 'Cartão Principal criado' },
-    { id: 2, user_id: 1, user_name: 'Admin User', table_name: 'phones', record_id: 1, action: 'update', created_at: '2025-11-11 10:25:00', description: 'Telefone atualizado' },
-    { id: 3, user_id: 1, user_name: 'Admin User', table_name: 'fb_profiles', record_id: 1, action: 'create', created_at: '2025-11-11 10:20:00', description: 'Perfil João Silva criado' },
-    { id: 4, user_id: 1, user_name: 'Admin User', table_name: 'fb_bms', record_id: 1, action: 'update', created_at: '2025-11-11 10:15:00', description: 'BM Principal atualizado' },
-    { id: 5, user_id: 1, user_name: 'Admin User', table_name: 'fb_pages', record_id: 2, action: 'delete', created_at: '2025-11-11 10:10:00', description: 'Página excluída' },
-  ]);
-
+  const [logs, setLogs] = useState<Log[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('all');
   const [filterTable, setFilterTable] = useState('all');
 
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await logService.getAllLogs();
+      setLogs(response);
+    } catch (error) {
+      console.error('Erro ao buscar logs:', error);
+    }
+  };
+
   const getActionBadge = (action: string) => {
     const colors = {
-      create: 'bg-green-900 text-green-300',
-      update: 'bg-blue-900 text-blue-300',
-      delete: 'bg-red-900 text-red-300',
+      INSERT: 'bg-green-900 text-green-300',
+      UPDATE: 'bg-blue-900 text-blue-300',
+      DELETE: 'bg-red-900 text-red-300',
+      SOFT_DELETE: 'bg-red-900 text-red-300',
+      SOFT_DELETE_TRIGGER: 'bg-red-900 text-red-300',
     };
     return colors[action as keyof typeof colors] || 'bg-gray-900 text-gray-300';
   };
 
   const getActionLabel = (action: string) => {
     const labels = {
-      create: 'Criação',
-      update: 'Atualização',
-      delete: 'Exclusão',
-    };
+      INSERT: 'Criação',
+      UPDATE: 'Atualização',
+      DELETE: 'Exclusão',
+      SOFT_DELETE: 'Exclusão (soft delete)',
+      SOFT_DELETE_TRIGGER: 'Exclusão (soft delete trigger)',
+    };  
     return labels[action as keyof typeof labels] || action;
   };
 
@@ -56,10 +67,19 @@ export default function LogsPage() {
   };
 
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = log.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.user_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAction = filterAction === 'all' || log.action === filterAction;
-    const matchesTable = filterTable === 'all' || log.table_name === filterTable;
+    const description = log.description || '';
+    const userName = log.user_name || '';
+
+    const matchesSearch =
+      description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      userName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesAction =
+      filterAction === 'all' || log.action === filterAction;
+
+    const matchesTable =
+      filterTable === 'all' || log.table_name === filterTable;
+
     return matchesSearch && matchesAction && matchesTable;
   });
 
@@ -91,10 +111,13 @@ export default function LogsPage() {
               className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 appearance-none"
             >
               <option value="all">Todas as Ações</option>
-              <option value="create">Criação</option>
-              <option value="update">Atualização</option>
-              <option value="delete">Exclusão</option>
+              <option value="INSERT">Criação</option>
+              <option value="UPDATE">Atualização</option>
+              <option value="DELETE">Exclusão</option>
+              <option value="SOFT_DELETE">Exclusão (soft delete)</option>
+              <option value="SOFT_DELETE_TRIGGER">Exclusão (soft delete trigger)</option>
             </select>
+
           </div>
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
