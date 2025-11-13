@@ -64,5 +64,5 @@ Route::group([
     'as' => 'cards.',
     'namespace' => 'App\Http\Controllers\Panel',
 ], function () {
-    require __DIR__ . '/Panel/cards.php';
+    require __DIR__ . '/Panel/card.php';
 });
