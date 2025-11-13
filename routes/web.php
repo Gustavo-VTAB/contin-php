@@ -49,4 +49,13 @@ Route::group([
 ], function () {
     require __DIR__ . '/Panel/phones.php';
 });
+
+
+Route::group([
+    'prefix' => 'cards',
+    'as' => 'cards.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/card.php';
+});
     

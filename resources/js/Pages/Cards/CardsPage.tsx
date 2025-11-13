@@ -1,17 +1,15 @@
-import { useState } from 'react';
+import {useEffect, useState } from 'react';
 import AppLayout from '@/Layout/AppLayout';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 import { Card } from '@/types';
+import { cardService } from './Service/cardService';
+import { toast } from '@/components/ui/sonner';
 
 
 export default function CardsPage() {
-  const [cards, setCards] = useState<Card[]>([
-    { id: 1, name: 'Cartão Principal', number: '**** **** **** 1234', validity: '12/25', cvv: '***', limit: 'R$ 5.000,00', status: 'active', obs: 'Cartão principal da empresa' },
-    { id: 2, name: 'Cartão Secundário', number: '**** **** **** 5678', validity: '06/26', cvv: '***', limit: 'R$ 3.000,00', status: 'active', obs: '' },
-  ]);
-
+  const [cards, setCards] = useState<Card[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -25,6 +23,15 @@ export default function CardsPage() {
     status: 'active',
     obs: '',
   });
+  useEffect(() => {
+    const fetchCards = async () => {
+      const response = await cardService.getAllCards();
+      setCards(response);
+    };
+
+    
+    fetchCards();
+  }, []);
 
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', card?: Card) => {
     setModalMode(mode);
@@ -49,29 +56,49 @@ export default function CardsPage() {
     setIsModalOpen(false);
     setSelectedCard(null);
   };
+// Dados temporários do modal
+const [tempData, setTempData] = useState({
+    name: '',
+    number: '',
+    validity: '',
+    cvv: '',
+    limit: '',
+    status: 'active',
+    obs: '',
+  });
 
-  const handleSave = () => {
-    if (modalMode === 'create') {
-      const newCard: Card = {
-        id: cards.length + 1,
-        ...formData,
-      };
-      setCards([...cards, newCard]);
-    } else if (modalMode === 'edit' && selectedCard) {
-      setCards(cards.map(c => c.id === selectedCard.id ? { ...c, ...formData } : c));
+const handleSave = async() => {
+    try {
+      if (modalMode === 'create') {
+        const response = await cardService.createCard(formData);
+      } else if (modalMode === 'edit' && selectedCard) {
+        const response = await cardService.updateCard(selectedCard.id);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao salvar cartão:', error);   
+
+    const filteredCards = cards.filter(card =>
+      card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.number.includes(searchTerm)
+    );
+  }
+};
+
+  const handleDelete = async(id: number) => {
+    if (confirm('Tem certeza que deseja excluir este perfil?')) {
+      try {
+        const response = await cardService.deleteCard(id);
+        setCards(cards.filter(c => c.id !== id));
+        toast.success(response.message);
+      } catch (error) {
+        console.error('Erro ao excluir perfil:', error);
+      }
     }
-    handleCloseModal();
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este cartão?')) {
-      setCards(cards.filter(c => c.id !== id));
-    }
-  };
-
-  const filteredCards = cards.filter(card =>
-    card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.number.includes(searchTerm)
+  const filteredCards = (cards ? cards : [] ).filter(card =>
+    card.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -224,3 +251,4 @@ export default function CardsPage() {
     </AppLayout>
   );
 }
+
