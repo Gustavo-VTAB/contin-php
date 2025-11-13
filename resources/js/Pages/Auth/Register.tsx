@@ -16,7 +16,7 @@ export default function Register() {
     try {
       const response = await registerService.register(data);
       if(response.success){
-        router.visit('/login');
+        router.visit('/');
       }
     } catch (error) {
       console.error(error);
