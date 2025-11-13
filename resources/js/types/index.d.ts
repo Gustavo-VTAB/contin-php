@@ -38,3 +38,13 @@ interface BM {
   status: string;
   obs: string;
 }
+
+interface Page {
+  id: number;
+  name: string;
+  ig_login: string;
+  ig_email: string;
+  ig_password: string;
+  status: string;
+  obs: string;
+}

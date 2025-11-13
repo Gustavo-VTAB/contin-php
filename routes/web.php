@@ -66,3 +66,19 @@ Route::group([
 ], function () {
     require __DIR__ . '/Panel/card.php';
 });
+
+Route::group([
+    'prefix' => 'bms',
+    'as' => 'bms.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/bm.php';
+});
+
+Route::group([
+    'prefix' => 'pages',
+    'as' => 'pages.',
+    'namespace' => 'App\Http\Controllers\Panel',
+], function () {
+    require __DIR__ . '/Panel/pages.php';
+});

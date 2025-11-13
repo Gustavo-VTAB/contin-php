@@ -53,9 +53,9 @@ class PhoneController extends Controller
         return response()->json($phone);
     }
 
-    public function deletePhone($id)
+    public function destroy($id)
     {
-        $phone = $this->phoneService->deletePhone($id);
+        $phone = $this->phoneService->destroy($id);
         return response()->json($phone);
     }
 }

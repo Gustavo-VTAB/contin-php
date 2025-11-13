@@ -4,7 +4,7 @@ namespace App\Http\Requests\Panel;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PhoneRequest extends FormRequest
+class BmRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,12 +22,8 @@ class PhoneRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'card_id' => 'integer|nullable',
             'name' => 'string|max:255',
-            'status' => 'string|max:255',
-            'number' => 'string|max:255',
-            'operator' => 'string|max:255',
-            'easy_at' => 'string|max:255',
+            'obs' => 'nullable|string|max:500',
         ];
     }
 }

@@ -25,7 +25,7 @@ export default function ProfilesPage() {
     };
     
     const fetchPhones = async () => {
-      const response = await phoneService.getPhones();
+      const response = await phoneService.getAllPhones();
       setPhones(response.data);
     };
     fetchProfiles();

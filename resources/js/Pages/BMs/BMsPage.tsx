@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import {useEffect, useState } from 'react';
 import AppLayout from "@/Layout/AppLayout";
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 import { BM } from '@/types';
-
+import {bmService} from './Services/bmService';
+import {toast} from 'sonner';
 
 export default function BMsPage() {
   const [bms, setBms] = useState<BM[]>([]);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -18,6 +18,20 @@ export default function BMsPage() {
     status: 'active',
     obs: '',
   });
+
+
+  useEffect(() => {
+    const fetchBMs = async () => {
+      const response = await bmService.getAllBms();
+      setBms(response);
+    };
+
+    const fetchPhones = async () => {
+      const response = await bmService.getAllBms();
+      setBms(response);
+    };
+    fetchBMs();
+  }, []);
 
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', bm?: BM) => {
     setModalMode(mode);
@@ -39,16 +53,33 @@ export default function BMsPage() {
     setSelectedBM(null);
   };
 
-  // 🔹 Função única para criar ou salvar, sem form
-  const handleSaveClick = async() => {
-          
-  };
-
-  const handleDelete = (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este Business Manager?')) {
-      setBms(bms.filter(b => b.id !== id));
+  const handleSave= async() => {
+      try {
+      if (modalMode === 'create') {
+        const response = await bmService.createBm(formData);
+        toast.success(response.message);
+      } else if (modalMode === 'edit' && selectedBM) {
+        const response = await bmService.updateBm(selectedBM.id, formData);
+        toast.success(response.message);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error);
     }
   };
+
+  const handleDelete = async(id: number) => {
+    if (confirm('Tem certeza que deseja excluir este perfil?')) {
+      try {
+        const response = await bmService.deleteBm(id);
+        setBms(bms.filter(b => b.id !== id));
+        toast.success(response.message);
+      } catch (error) {
+        console.error('Erro ao excluir perfil:', error);
+      }
+    }
+  };
+
 
   const filteredBMs = bms.filter(bm =>
     bm.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -184,7 +215,7 @@ export default function BMsPage() {
 
               {modalMode !== 'view' && (
                 <button
-                  onClick={handleSaveClick}
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   {modalMode === 'create' ? 'Criar' : 'Salvar'}

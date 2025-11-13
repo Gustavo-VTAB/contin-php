@@ -1,42 +1,20 @@
 import axios from 'axios';
 
-
-
 export const phoneService = {
-    async getPhones() {
-        try {
-            const response = await axios.get('phones');
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao buscar telefones:', error);
-            throw error;
-        }
+    async getAllPhones() {
+        const response = await axios.get('/phones/getAllPhones');
+        return response.data;
     },
     async createPhone(phone) {
-        try {
-            const response = await axios.post('phones', phone);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao criar telefone:', error);
-            throw error;
-        }
+        const response = await axios.post('/phones/createPhone', phone);
+        return response.data;
     },
-    async updatePhone(phone) {
-        try {
-            const response = await axios.put(`phones/${phone.id}`, phone);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao atualizar telefone:', error);
-            throw error;
-        }
+    async updatePhone(id, phone) {
+        const response = await axios.put(`/phones/updatePhone/${id}`, phone);
+        return response.data;
     },
-    async deletePhone(id) {
-        try {
-            const response = await axios.delete(`phones/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao excluir telefone:', error);
-            throw error;
-        }
-    },
+    async destroy(id) {
+        const response = await axios.delete(`/phones/destroy/${id}`);
+        return response.data;
+    }
 }

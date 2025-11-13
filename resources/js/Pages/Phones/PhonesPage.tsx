@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/Layout/AppLayout';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 import { Card, Phone } from '@/types';
-
+import { phoneService } from './Service/phoneService';
+import { toast } from 'sonner';
 
 export default function PhonesPage() {
   const [phones, setPhones] = useState<Phone[]>([]);
@@ -21,6 +22,19 @@ export default function PhonesPage() {
     status: 'active',
     easy_at: '',
   });
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const response = await phoneService.getAllPhones();
+      setPhones(response);
+    };
+
+    const fetchPhones = async () => {
+      const response = await phoneService.getAllPhones();
+      setPhones(response.data);
+    };
+    fetchProfiles();
+  }, []);
 
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', phone?: Phone) => {
     setModalMode(mode);
@@ -45,14 +59,33 @@ export default function PhonesPage() {
     setSelectedPhone(null);
   };
 
-  const handleSave = () => {
-   
+  const handleSave = async() => {
+    try {
+      if (modalMode === 'create') {
+        const response = await phoneService.createPhone(formData);
+      } else if (modalMode === 'edit' && selectedPhone) {
+        const response = await phoneService.updatePhone(selectedPhone.id, formData);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error);
+        }
+    
   };
 
-  const filteredPhones = phones.filter(phone =>
-    phone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    phone.number.includes(searchTerm) ||
-    phone.operator.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleDelete = async(id: number) => {
+    if (confirm('Tem certeza que deseja excluir este perfil?')) {
+      try {
+        const response = await phoneService.destroy(id);
+        setPhones(phones.filter(p => p.id !== id));
+        toast.success(response.message);
+      } catch (error) {
+        console.error('Erro ao excluir perfil:', error);
+      }
+    }
+  };
+  const filteredPhones = (phones ? phones : [] ).filter(phone =>
+    phone.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

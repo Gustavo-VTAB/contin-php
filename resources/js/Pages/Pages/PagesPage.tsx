@@ -1,46 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/Layout/AppLayout';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
-
-interface Page {
-  id: number;
-  name: string;
-  ig_login: string;
-  ig_email: string;
-  ig_password: string;
-  status: string;
-  obs: string;
-}
+import type { Page } from '@/types';
+import { pageService } from './Service/pageService';
+import { toast } from 'sonner';
 
 export default function PagesPage() {
-  const [pages, setPages] = useState<Page[]>([
-    {
-      id: 1,
-      name: 'Página Loja Online',
-      ig_login: '@lojavirtual',
-      ig_email: 'loja@example.com',
-      ig_password: '********',
-      status: 'active',
-      obs: 'Página integrada com Instagram',
-    },
-    {
-      id: 2,
-      name: 'Página de Teste',
-      ig_login: '@testepage',
-      ig_email: 'teste@example.com',
-      ig_password: '********',
-      status: 'inactive',
-      obs: 'Página em modo de teste',
-    },
-  ]);
-
+  const [pages, setPages] = useState<Page[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
-  const [formData, setFormData] = useState({
+
+  const [tempData, setTempData] = useState({
     name: '',
     ig_login: '',
     ig_email: '',
@@ -49,11 +23,23 @@ export default function PagesPage() {
     obs: '',
   });
 
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const response = await pageService.getAllPages();
+        setPages(response);
+      } catch (error) {
+        console.error('Erro ao buscar páginas:', error);
+      }
+    };
+    fetchPages();
+  }, []);
+
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', page?: Page) => {
     setModalMode(mode);
     if (page) {
       setSelectedPage(page);
-      setFormData({
+      setTempData({
         name: page.name,
         ig_login: page.ig_login,
         ig_email: page.ig_email,
@@ -62,7 +48,15 @@ export default function PagesPage() {
         obs: page.obs,
       });
     } else {
-      setFormData({ name: '', ig_login: '', ig_email: '', ig_password: '', status: 'active', obs: '' });
+      setSelectedPage(null);
+      setTempData({
+        name: '',
+        ig_login: '',
+        ig_email: '',
+        ig_password: '',
+        status: 'active',
+        obs: '',
+      });
     }
     setIsModalOpen(true);
   };
@@ -72,26 +66,39 @@ export default function PagesPage() {
     setSelectedPage(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (modalMode === 'create') {
-      const newPage: Page = { id: pages.length + 1, ...formData };
-      setPages([...pages, newPage]);
-    } else if (modalMode === 'edit' && selectedPage) {
-      setPages(pages.map(p => (p.id === selectedPage.id ? { ...p, ...formData } : p)));
+  const handleSave = async () => {
+    try {
+      if (modalMode === 'create') {
+        const response = await pageService.createPage(tempData);
+        toast.success('Página criada com sucesso!');
+        setPages([...pages, response]);
+      } else if (modalMode === 'edit' && selectedPage) {
+        const response = await pageService.updatePage(selectedPage.id, tempData);
+        toast.success('Página atualizada com sucesso!');
+        setPages(pages.map(p => (p.id === selectedPage.id ? response : p)));
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Erro ao salvar página:', error);
+      toast.error('Erro ao salvar página');
     }
-    handleCloseModal();
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir esta página?')) {
-      setPages(pages.filter(p => p.id !== id));
+      try {
+        const response = await pageService.destroy(id);
+        setPages(pages.filter(p => p.id !== id));
+        toast.success(response.message);
+      } catch (error) {
+        console.error('Erro ao excluir página:', error);
+        toast.error('Erro ao excluir página');
+      }
     }
   };
 
-  const filteredPages = pages.filter(page =>
-    page.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    page.ig_login.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPages = (pages ? pages : [] ).filter(page =>
+    page.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -166,7 +173,7 @@ export default function PagesPage() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Modal (sem form) */}
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
@@ -175,21 +182,19 @@ export default function PagesPage() {
               ? 'Nova Página'
               : modalMode === 'edit'
               ? 'Editar Página'
-              : 'Visualizar Página'
+              : 'Detalhes da Página'
           }
-          size="lg"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Nome da Página</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={tempData.name}
+                  onChange={(e) => setTempData({ ...tempData, name: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                  required
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                 />
               </div>
 
@@ -197,10 +202,10 @@ export default function PagesPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Login</label>
                 <input
                   type="text"
-                  value={formData.ig_login}
-                  onChange={(e) => setFormData({ ...formData, ig_login: e.target.value })}
+                  value={tempData.ig_login}
+                  onChange={(e) => setTempData({ ...tempData, ig_login: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                   placeholder="@usuario"
                 />
               </div>
@@ -209,10 +214,10 @@ export default function PagesPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Email</label>
                 <input
                   type="email"
-                  value={formData.ig_email}
-                  onChange={(e) => setFormData({ ...formData, ig_email: e.target.value })}
+                  value={tempData.ig_email}
+                  onChange={(e) => setTempData({ ...tempData, ig_email: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                   placeholder="email@example.com"
                 />
               </div>
@@ -221,10 +226,10 @@ export default function PagesPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Instagram Senha</label>
                 <input
                   type="password"
-                  value={formData.ig_password}
-                  onChange={(e) => setFormData({ ...formData, ig_password: e.target.value })}
+                  value={tempData.ig_password}
+                  onChange={(e) => setTempData({ ...tempData, ig_password: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                   placeholder="••••••••"
                 />
               </div>
@@ -232,10 +237,10 @@ export default function PagesPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  value={tempData.status}
+                  onChange={(e) => setTempData({ ...tempData, status: e.target.value })}
                   disabled={modalMode === 'view'}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
@@ -246,32 +251,31 @@ export default function PagesPage() {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Observações</label>
               <textarea
-                value={formData.obs}
-                onChange={(e) => setFormData({ ...formData, obs: e.target.value })}
+                value={tempData.obs}
+                onChange={(e) => setTempData({ ...tempData, obs: e.target.value })}
                 disabled={modalMode === 'view'}
                 rows={3}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
               />
             </div>
 
-            {modalMode !== 'view' && (
-              <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              {modalMode !== 'view' && (
                 <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   {modalMode === 'create' ? 'Criar' : 'Salvar'}
                 </button>
-              </div>
-            )}
-          </form>
+              )}
+            </div>
+          </div>
         </Modal>
       </div>
     </AppLayout>

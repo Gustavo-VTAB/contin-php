@@ -8,7 +8,10 @@ class PhoneService
 {
     public function getAllPhones()
     {
-        return DB::table('phones')->get();
+        return DB::table('phones')
+            ->where('deleted', false)
+            ->get();
+
     }
 
     public function createPhone($data)
@@ -42,21 +45,14 @@ class PhoneService
         return ['message' => 'Telefone atualizado com sucesso!'];
     }
 
-    public function deletePhone($id)
+    public function destroy($id)
     {
-        $oldData = DB::table('phones')->where('id', $id)->first();
-
-        DB::table('phones')->where('id', $id)->delete();
-
-        DB::table('logs')->insert([
-            'user_id' => auth()->id() ?? 0,
-            'table_name' => 'phones',
-            'record_id' => $id,
-            'action' => 'DELETE',
-            'old_data' => json_encode($oldData),
-            'created_at' => now(),
+        DB::statement('CALL sp_excluir_phone(?, ?)', [
+            $id,
+            auth()->id() ?? 0
         ]);
 
-        return ['message' => 'Telefone deletado com sucesso!'];
+        return ['message' => 'Telefone excluído (soft delete) com sucesso!'];
     }
+
 }

@@ -88,7 +88,15 @@ VALUES
 ('Página de Teste', 'inactive', '@testepage', 'teste@example.com', 'senha456', 'Página em modo de teste');
 
 
+ALTER TABLE fb_bms
+ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS deleted_by BIGINT NULL;
 
+ALTER TABLE fb_pages
+ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS deleted_by BIGINT NULL;
 
 
 -------------------------------------------------------------------------------
@@ -174,7 +182,7 @@ $$;
 
 -----------------------------------------------------------------------
 
-
+--PROFILE
 --Procedure: Inserir perfil + log
 CREATE OR REPLACE PROCEDURE sp_insert_fb_profile(
     p_name VARCHAR,
@@ -282,7 +290,7 @@ END;
 $$;
 
 
-
+--PHONES
 --inserir phones 
 
 CREATE OR REPLACE PROCEDURE sp_insert_phone(
@@ -363,6 +371,44 @@ BEGIN
 END;
 $$;
 
+--Ecluir Phone
+
+CREATE OR REPLACE PROCEDURE sp_excluir_phone(
+    p_id BIGINT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    -- Capturar dados antigos antes da exclusão
+    SELECT to_jsonb(ph) INTO v_old_data
+    FROM phones ph
+    WHERE id = p_id;
+
+    -- Atualizar registro (soft delete)
+    UPDATE phones
+    SET deleted = TRUE,
+        deleted_at = NOW(),
+        deleted_by = p_user_id,
+        status = 'inactive'
+    WHERE id = p_id;
+
+    -- Capturar dados novos (após soft delete)
+    SELECT to_jsonb(ph) INTO v_new_data
+    FROM phones ph
+    WHERE id = p_id;
+
+    -- Registrar log no histórico
+    INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+    VALUES (p_user_id, 'phones', p_id, 'SOFT_DELETE', v_old_data, v_new_data);
+END;
+$$;
+
+
+--CARDS
 ---Inserir cartão
 CREATE OR REPLACE PROCEDURE sp_insert_card(
     p_status VARCHAR,
@@ -438,8 +484,224 @@ BEGIN
 END;
 $$;
 
+--BMS
 
 
+-- Procedure: Inserir Business Manager + log
+CREATE OR REPLACE PROCEDURE sp_insert_fb_bm(
+    p_name VARCHAR,
+    p_status VARCHAR,
+    p_obs TEXT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_new_id BIGINT;
+    v_new_data JSONB;
+BEGIN
+    INSERT INTO fb_bms (name, status, obs)
+    VALUES (p_name, COALESCE(p_status, 'active'), p_obs)
+    RETURNING id INTO v_new_id;
+
+    v_new_data := jsonb_build_object(
+        'id', v_new_id,
+        'name', p_name,
+        'status', p_status,
+        'obs', p_obs
+    );
+
+    INSERT INTO logs (user_id, table_name, record_id, action, new_data)
+    VALUES (p_user_id, 'fb_bms', v_new_id, 'INSERT', v_new_data);
+END;
+$$;
+
+
+
+-- Procedure: Atualizar Business Manager + log
+CREATE OR REPLACE PROCEDURE sp_update_fb_bm(
+    p_id BIGINT,
+    p_name VARCHAR,
+    p_status VARCHAR,
+    p_obs TEXT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    -- capturar dados antigos
+    SELECT to_jsonb(b) INTO v_old_data
+    FROM fb_bms b
+    WHERE id = p_id;
+
+    -- atualizar registro
+    UPDATE fb_bms
+    SET name = p_name,
+        status = COALESCE(p_status, status),
+        obs = p_obs
+    WHERE id = p_id;
+
+    -- capturar dados novos
+    SELECT to_jsonb(b) INTO v_new_data
+    FROM fb_bms b
+    WHERE id = p_id;
+
+    -- gravar log
+    INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+    VALUES (p_user_id, 'fb_bms', p_id, 'UPDATE', v_old_data, v_new_data);
+END;
+$$;
+
+
+
+-- Procedure: Exclusão lógica (Soft Delete) de Business Manager + log
+CREATE OR REPLACE PROCEDURE sp_excluir_fb_bm(
+    p_id BIGINT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    -- capturar dados antigos
+    SELECT to_jsonb(b) INTO v_old_data
+    FROM fb_bms b
+    WHERE id = p_id;
+
+    -- atualizar registro (soft delete)
+    UPDATE fb_bms
+    SET deleted = TRUE,
+        deleted_at = NOW(),
+        deleted_by = p_user_id,
+        status = 'inactive'
+    WHERE id = p_id;
+
+    -- capturar dados novos
+    SELECT to_jsonb(b) INTO v_new_data
+    FROM fb_bms b
+    WHERE id = p_id;
+
+    -- registrar log
+    INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+    VALUES (p_user_id, 'fb_bms', p_id, 'SOFT_DELETE', v_old_data, v_new_data);
+END;
+$$;
+
+
+----PAGES
+-- Inserir Página
+CREATE OR REPLACE PROCEDURE sp_insert_fb_page(
+    p_name VARCHAR,
+    p_status VARCHAR,
+    p_ig_login VARCHAR,
+    p_ig_email VARCHAR,
+    p_ig_password VARCHAR,
+    p_obs TEXT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_new_id BIGINT;
+    v_new_data JSONB;
+BEGIN
+    INSERT INTO fb_pages (name, status, ig_login, ig_email, ig_password, obs)
+    VALUES (p_name, COALESCE(p_status, 'active'), p_ig_login, p_ig_email, p_ig_password, p_obs)
+    RETURNING id INTO v_new_id;
+
+    v_new_data := jsonb_build_object(
+        'id', v_new_id,
+        'name', p_name,
+        'status', p_status,
+        'ig_login', p_ig_login,
+        'ig_email', p_ig_email,
+        'ig_password', p_ig_password,
+        'obs', p_obs
+    );
+
+    INSERT INTO logs (user_id, table_name, record_id, action, new_data)
+    VALUES (p_user_id, 'fb_pages', v_new_id, 'INSERT', v_new_data);
+END;
+$$;
+
+
+
+-- Atualizar Página
+CREATE OR REPLACE PROCEDURE sp_update_fb_page(
+    p_id BIGINT,
+    p_name VARCHAR,
+    p_status VARCHAR,
+    p_ig_login VARCHAR,
+    p_ig_email VARCHAR,
+    p_ig_password VARCHAR,
+    p_obs TEXT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    SELECT to_jsonb(pg) INTO v_old_data
+    FROM fb_pages pg
+    WHERE id = p_id;
+
+    UPDATE fb_pages
+    SET name = p_name,
+        status = COALESCE(p_status, status),
+        ig_login = p_ig_login,
+        ig_email = p_ig_email,
+        ig_password = p_ig_password,
+        obs = p_obs
+    WHERE id = p_id;
+
+    SELECT to_jsonb(pg) INTO v_new_data
+    FROM fb_pages pg
+    WHERE id = p_id;
+
+    INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+    VALUES (p_user_id, 'fb_pages', p_id, 'UPDATE', v_old_data, v_new_data);
+END;
+$$;
+
+
+
+-- Exclusão Lógica (Soft Delete)
+CREATE OR REPLACE PROCEDURE sp_excluir_fb_page(
+    p_id BIGINT,
+    p_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    SELECT to_jsonb(pg) INTO v_old_data
+    FROM fb_pages pg
+    WHERE id = p_id;
+
+    UPDATE fb_pages
+    SET deleted = TRUE,
+        deleted_at = NOW(),
+        deleted_by = p_user_id,
+        status = 'inactive'
+    WHERE id = p_id;
+
+    SELECT to_jsonb(pg) INTO v_new_data
+    FROM fb_pages pg
+    WHERE id = p_id;
+
+    INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+    VALUES (p_user_id, 'fb_pages', p_id, 'SOFT_DELETE', v_old_data, v_new_data);
+END;
+$$;
 
 
 -------------Triggers-----------------
@@ -527,3 +789,57 @@ BEGIN
     VALUES (p_user_id, 'cards', p_id, 'SOFT_DELETE', v_old_data, v_new_data);
 END;
 $$;
+
+
+
+-- Trigger: registrar log automático quando o campo "deleted" mudar
+CREATE OR REPLACE FUNCTION trg_fb_bms_soft_delete()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    IF (OLD.deleted = FALSE AND NEW.deleted = TRUE) THEN
+        v_old_data := to_jsonb(OLD);
+        v_new_data := to_jsonb(NEW);
+
+        INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+        VALUES (NEW.deleted_by, 'fb_bms', NEW.id, 'SOFT_DELETE_TRIGGER', v_old_data, v_new_data);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_fb_bms_soft_delete ON fb_bms;
+CREATE TRIGGER trg_fb_bms_soft_delete
+AFTER UPDATE ON fb_bms
+FOR EACH ROW
+WHEN (OLD.deleted IS DISTINCT FROM NEW.deleted)
+EXECUTE FUNCTION trg_fb_bms_soft_delete();
+
+--Pages
+CREATE OR REPLACE FUNCTION trg_fb_pages_soft_delete()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+BEGIN
+    IF (OLD.deleted = FALSE AND NEW.deleted = TRUE) THEN
+        v_old_data := to_jsonb(OLD);
+        v_new_data := to_jsonb(NEW);
+
+        INSERT INTO logs (user_id, table_name, record_id, action, old_data, new_data)
+        VALUES (NEW.deleted_by, 'fb_pages', NEW.id, 'SOFT_DELETE_TRIGGER', v_old_data, v_new_data);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_fb_pages_soft_delete ON fb_pages;
+CREATE TRIGGER trg_fb_pages_soft_delete
+AFTER UPDATE ON fb_pages
+FOR EACH ROW
+WHEN (OLD.deleted IS DISTINCT FROM NEW.deleted)
+EXECUTE FUNCTION trg_fb_pages_soft_delete();
