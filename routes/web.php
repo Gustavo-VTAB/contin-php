@@ -15,9 +15,9 @@ Route::group([
     'namespace' => 'App\Http\Controllers\Pages',
 ], function () {
     Route::get('/', [LoginController::class, 'index'])->name('index');
+    Route::get('/register', [RegisterController::class, 'index'])->name('register');
 
     Route::middleware(['auth'])->group(function () {
-        Route::get('/register', [RegisterController::class, 'index'])->name('register');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/cards', [CardsController::class, 'index'])->name('cards');
         Route::get('/bms', [BMsController::class, 'index'])->name('bms');
