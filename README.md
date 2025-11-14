@@ -1,59 +1,139 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="https://laravel.com" target="_blank">
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="380" alt="Laravel Logo">
+  </a>
 </p>
 
-## About Laravel
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php&logoColor=white" />
+  <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?logo=laravel&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-316192?logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Node.js-16%2B-339933?logo=node.js&logoColor=white" />
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<br>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# 🚀 contin-php
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplicação desenvolvida em **Laravel**, utilizando **PostgreSQL**, **Vite**, **Node**, **Composer** e **PHP 8+**.  
+Este guia irá te ajudar a instalar e executar o projeto do zero.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📦 Pré-requisitos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Instale no seu computador:
 
-## Laravel Sponsors
+- **PHP 8.x**
+- **Composer**
+- **PostgreSQL 14+**
+- **Node.js 16+**
+- **npm** (ou Yarn)
+- **Git**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Recomendado:
+- **DBeaver**, **pgAdmin**, **TablePlus** ou outro cliente DB.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 📁 Clonando o Projeto
 
-## Contributing
+```bash
+git clone https://github.com/Gustavo-VTAB/contin-php.git
+cd contin-php
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+📚 Instalando dependências
 
-## Code of Conduct
+🐘 Dependências PHP (Laravel)
+composer install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+📦 Dependências do Frontend (Vite)
+npm install
 
-## Security Vulnerabilities
+⚙️ Configurando o arquivo .env
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Crie o arquivo:
+cp .env.example .env
+Agora edite as configs principais, incluindo PostgreSQL:
 
-## License
+APP_NAME=ContinPHP
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Banco de dados PostgreSQL
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=contin
+DB_USERNAME=postgres
+DB_PASSWORD=sua_senha
+
+Gere a chave da aplicação:
+php artisan key:generate
+
+
+🗃️ Banco de Dados
+Criar o banco:
+CREATE DATABASE contin;
+
+Rodar migrations e seeders:
+php artisan migrate
+php artisan db:seed
+
+
+importar o arquivo .sql via pgAdmin ou DBeaver
+Abra o cliente PostgreSQL → Import → selecione o dump → execute.
+
+▶️ Rodando o Projeto
+Backend (Laravel)
+php artisan serve
+
+Acesse:
+👉 http://localhost:8000
+
+Frontend (Vite)
+Abra outro terminal:
+npm run dev
+
+🧹 Comandos úteis
+Se algo quebrar, limpe tudo:
+php artisan optimize:clear
+
+
+Limpar manualmente:
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
+php artisan view:clear
+
+🛠️ Tecnologias Utilizadas
+Laravel
+
+PostgreSQL
+
+PHP 8+
+
+Node.js
+
+Vite
+
+Composer
+
+npm
+
+📌 Observações
+O projeto usa PostgreSQL — certifique-se de não configurar MySQL.
+
+Após alterar o .env, execute:
+
+bash
+Copiar código
+php artisan config:clear
+📄 Licença
+Este projeto segue a licença MIT.
+O framework Laravel também é open-source sob a licença MIT.
+```
+<p align="center">Feito com ❤️ por <strong>Fernanda Frois e Gustavo Novais</strong></p>
