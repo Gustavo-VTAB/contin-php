@@ -29,4 +29,24 @@ export const loginService = {
         }
     },
 
+    async getProfile(){
+        try {
+            const response = await axios.get('Auth/getProfile');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+
+    async changePassword(email, newPassword){
+        try {
+            const response = await axios.post('Auth/changePassword', {email, newPassword});
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+
 }

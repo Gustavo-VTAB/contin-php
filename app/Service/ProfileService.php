@@ -8,9 +8,21 @@ class ProfileService
 {
     public function getAllProfiles()
     {
-         return DB::table('fb_profiles')
-            ->where('deleted', false)
-            ->get();
+        return DB::table('fb_profiles')
+            ->leftJoin('phones', 'fb_profiles.phone_id', '=', 'phones.id')
+            ->where('fb_profiles.deleted', false)
+            ->select(
+                'fb_profiles.*',
+
+                // Dados do telefone
+                'phones.number as phone_number',
+                'phones.name as phone_name',
+                'phones.status as phone_status',
+                'phones.operator as phone_operator',
+                'phones.easy_at as phone_easy_at',
+                'phones.id as phone_id'
+            )
+        ->get();
     }
 
     public function createProfile($data)

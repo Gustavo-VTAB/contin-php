@@ -26,9 +26,10 @@ export default function ProfilesPage() {
     
     const fetchPhones = async () => {
       const response = await phoneService.getAllPhones();
-      setPhones(response.data);
+      setPhones(response);
     };
     fetchProfiles();
+    fetchPhones();
   }, []);
 
   // Dados temporários do modal
@@ -197,8 +198,8 @@ export default function ProfilesPage() {
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white disabled:opacity-50"
                 >
                   <option value="">Nenhum</option>
-                  {phones.map((phone) => (
-                    <option key={phone.id} value={phone.id}>{phone.number}</option>
+                  {phones?.map((phone) => (
+                    <option key={phone.id} value={phone.id}>{phone.name}</option>
                   ))}
                 </select>
               </div>

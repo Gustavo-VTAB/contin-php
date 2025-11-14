@@ -69,7 +69,7 @@ class LoginController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
         Auth::logout();
         return response()->json(['success' => true, 'message' => 'Logout realizado com sucesso.']);
@@ -120,4 +120,63 @@ class LoginController extends Controller
             ]);
         }
     }
+
+    public function getProfile()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuário não autenticado'], 401);
+        }
+
+        return response()->json($user);
+    }
+
+  public function changePassword(Request $request)
+{
+    $email = addslashes($request->input('email'));
+    $password = addslashes($request->input('newPassword'));
+
+    if ($email === null || $password === null) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Email e nova senha são obrigatórios.'
+        ]);
+    }
+
+    try {
+        // cria tabela temporária
+        DB::statement("CREATE TEMP TABLE IF NOT EXISTS temp_msg (mensagem TEXT);");
+        DB::statement("TRUNCATE temp_msg;");
+
+        // executa procedure com variável de saída
+        $sql = "
+            DO $$
+            DECLARE 
+                v_msg TEXT;
+            BEGIN
+                CALL sp_trocar_senha('$email', '$password', v_msg);
+                INSERT INTO temp_msg VALUES (v_msg);
+            END$$;
+        ";
+
+        DB::statement($sql);
+
+        // lê a mensagem
+        $msgResult = DB::selectOne("SELECT mensagem FROM temp_msg LIMIT 1");
+        $mensagem = $msgResult->mensagem ?? 'Erro ao obter mensagem.';
+
+        return response()->json([
+            'success' => true,
+            'message' => $mensagem
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao trocar senha: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
 }

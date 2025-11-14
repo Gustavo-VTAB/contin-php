@@ -1,24 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppLayout from "@/Layout/AppLayout";
 import { Lock, Mail, User, Save, Edit3 } from "lucide-react";
+import { loginService } from "./Service/loginService";
+import { toast } from "sonner";
+
 
 export default function ProfilePage() {
-  const [user, setUser] = useState({
-    name: "Fernanda Frois",
-    email: "fernanda@example.com",
-  });
-
+  const [user, setUser] = useState<any>({});
+  const [message, setMessage] = useState("");
+  const [isEditing, setIsEditing] = useState(false); // 🔹 controla edição
   const [passwordData, setPasswordData] = useState({
     current: "",
     new: "",
     confirm: "",
   });
 
-  const [message, setMessage] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // 🔹 controla edição
+  useEffect( () => {
+    const fetchUser = async () => {
+      try{
+        const response = await loginService.getProfile();
+        setUser(response);
+      } catch (error) {
+        console.error('Erro ao buscar perfil:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // 🔹 função para alterar senha sem form
-  const handlePasswordChangeClick = () => {
+  const handlePasswordChangeClick = async () => {
     if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
       setMessage("Preencha todos os campos!");
       return;
@@ -29,14 +40,17 @@ export default function ProfilePage() {
       return;
     }
 
-    setMessage("Senha alterada com sucesso!");
+    try {
+      const response  = await loginService.changePassword(user.email, passwordData.new);
+
+      toast.success(response.message);
+    } catch (error) {
+      toast.error("Erro ao alterar senha!");
+    }
     setPasswordData({ current: "", new: "", confirm: "" });
+    setIsEditing(false);
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    setMessage("Dados atualizados com sucesso!");
-  };
 
   return (
     <AppLayout>
@@ -70,7 +84,7 @@ export default function ProfilePage() {
                 </button>
               ) : (
                 <button
-                  onClick={handleSave}
+                  onClick={handlePasswordChangeClick}
                   className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 hover:bg-green-700 rounded-lg text-white"
                 >
                   <Save size={16} />
@@ -95,7 +109,7 @@ export default function ProfilePage() {
                     readOnly={!isEditing}
                     onChange={(e) => setUser({ ...user, name: e.target.value })}
                     className={`w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 ${
-                      !isEditing ? "opacity-70 cursor-not-allowed" : ""
+                      !isEditing ? "opacity-70 cursor-not-allowed " : ""
                     }`}
                   />
                 </div>

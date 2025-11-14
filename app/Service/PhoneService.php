@@ -8,10 +8,15 @@ class PhoneService
 {
     public function getAllPhones()
     {
-        return DB::table('phones')
-            ->where('deleted', false)
+       return DB::table('phones')
+            ->leftJoin('cards', 'phones.card_id', '=', 'cards.id')
+            ->where('phones.deleted', false)
+            ->select(
+                'phones.*',
+                'cards.name as card_name',
+                'cards.id as card_id'
+            )
             ->get();
-
     }
 
     public function createPhone($data)

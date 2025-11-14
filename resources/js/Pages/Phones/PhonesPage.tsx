@@ -6,6 +6,7 @@ import { Plus, Edit, Eye, Trash2, Search } from 'lucide-react';
 import { Card, Phone } from '@/types';
 import { phoneService } from './Service/phoneService';
 import { toast } from 'sonner';
+import { cardService } from '../Cards/Service/cardService';
 
 export default function PhonesPage() {
   const [phones, setPhones] = useState<Phone[]>([]);
@@ -24,16 +25,17 @@ export default function PhonesPage() {
   });
 
   useEffect(() => {
-    const fetchProfiles = async () => {
+    const fetchPhones = async () => {
       const response = await phoneService.getAllPhones();
       setPhones(response);
     };
 
-    const fetchPhones = async () => {
-      const response = await phoneService.getAllPhones();
-      setPhones(response.data);
+    const  fetchCards = async () => {
+      const response = await cardService.getAllCards();
+      setCards(response);
     };
-    fetchProfiles();
+    fetchPhones();
+    fetchCards();
   }, []);
 
   const handleOpenModal = (mode: 'create' | 'edit' | 'view', phone?: Phone) => {
@@ -46,7 +48,7 @@ export default function PhonesPage() {
         operator: phone.operator,
         card_id: phone.card_id?.toString() || '',
         status: phone.status,
-        easy_at: phone.easy_at,
+        easy_at: formatToInput(phone.easy_at),
       });
     } else {
       setFormData({ name: '', number: '', operator: '', card_id: '', status: 'active', easy_at: '' });
@@ -84,9 +86,19 @@ export default function PhonesPage() {
       }
     }
   };
+
   const filteredPhones = (phones ? phones : [] ).filter(phone =>
     phone.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatToInput = (date: string | null) => {
+    if (!date) return "";
+    // se vier com hora, remove
+    const clean = date.split(" ")[0];
+    const [year, month, day] = clean.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
 
   return (
     <AppLayout>
@@ -133,7 +145,7 @@ export default function PhonesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {filteredPhones.map((phone) => (
+                { filteredPhones.map((phone) => (
                   <tr key={phone.id} className="hover:bg-gray-800 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{phone.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{phone.number}</td>
@@ -217,7 +229,7 @@ export default function PhonesPage() {
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
                 >
                   <option value="">Nenhum</option>
-                    {cards.map(card => (
+                    {cards?.map(card => (
                       <option key={card.id} value={card.id}>{card.name}</option>
                     ))}
                 </select>

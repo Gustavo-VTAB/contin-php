@@ -13,6 +13,8 @@ import {
   X
 } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { loginService } from '@/Pages/Auth/Service/loginService';
+import { toast } from 'sonner';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -32,6 +34,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    const response = await loginService.logout();
+    toast.success(response.message);
+    router.visit('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -78,7 +86,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </button>
             <button className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
               <LogOut size={20} />
-              <span className="font-medium">Sair</span>
+              <span className="font-medium" onClick={() => handleLogout()}>Sair</span>
             </button>
           </div>
         </div>
@@ -95,15 +103,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             >
               <Menu size={24} />
             </button>
-            <div className="flex items-center gap-4 ml-auto">
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">Admin User</p>
-                <p className="text-xs text-gray-400">admin@example.com</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                <User size={20} className="text-white" />
-              </div>
-            </div>
+            
           </div>
         </header>
 
