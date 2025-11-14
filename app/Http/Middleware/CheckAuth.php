@@ -17,10 +17,7 @@ class CheckAuth
     public function handle($request, Closure $next)
     {
         if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuário não autenticado.'
-            ], 401);
+            return redirect()->route('index');
         }
 
         return $next($request);

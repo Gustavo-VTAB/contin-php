@@ -88,6 +88,21 @@ VALUES
 ('Página de Teste', 'inactive', '@testepage', 'teste@example.com', 'senha456', 'Página em modo de teste');
 
 
+ALTER TABLE cards
+ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS deleted_by BIGINT NULL;
+
+ALTER TABLE fb_profiles
+ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS deleted_by BIGINT NULL;
+
+ALTER TABLE phones
+ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS deleted_by BIGINT NULL;
+
 ALTER TABLE fb_bms
 ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL,
@@ -168,13 +183,27 @@ $$;
 
 --trocar senha 
 
-CREATE OR REPLACE PROCEDURE sp_trocar_senha(IN p_email VARCHAR, IN p_nova_senha VARCHAR)
+CREATE OR REPLACE PROCEDURE sp_trocar_senha(
+    IN p_email VARCHAR,
+    IN p_nova_senha VARCHAR,
+    OUT p_msg TEXT
+)
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_afetados INT;
 BEGIN
     UPDATE users
     SET password = p_nova_senha
     WHERE email = p_email AND blocked = FALSE;
+
+    GET DIAGNOSTICS v_afetados = ROW_COUNT;
+
+    IF v_afetados > 0 THEN
+        p_msg := 'Senha alterada com sucesso.';
+    ELSE
+        p_msg := 'Email não encontrado ou usuário bloqueado.';
+    END IF;
 END;
 $$;
 
